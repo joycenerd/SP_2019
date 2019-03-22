@@ -16,12 +16,11 @@ inline void fast_srand(int seed) {
 
 // Compute a pseudorandom integer.
 inline int fast_rand(void) {
-	//g_seed=(g_seed>>16)&0x7FFF;
     g_seed = (214013*g_seed+2531011);
-    //return (g_seed>>16)&0x7FFF;
 	return (g_seed>>2);
 }
 
+// generate random numbers for table
 void initTable()
 {
 	int i, j;
@@ -31,22 +30,23 @@ void initTable()
 			table[i][j] = fast_rand();
 }
 
+// find column elements
 void sumCol()
 {
 	int i, j;
 	for (j = 0; j < size; j++)
-		//for (i = 0; i < size; i++)
-			col[j] = table[size-1][j];
+		col[j] = table[size-1][j];
 }
 
+// find row elements
 void sumRow()
 {
 	int i, j;
 	for (i = 0; i < size; i++)
-		//for (j = 0; j < size; j++)
 		row[i] = table[i][size-1];
 }
 
+// print out the result
 void printResult()
 {
 	int i;
