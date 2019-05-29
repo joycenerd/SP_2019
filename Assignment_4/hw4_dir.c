@@ -6,9 +6,18 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
+#define MAX_DIRSIZE 1010
 
 int level = 0;
-int cmp(const void *a, const void *b) { return strcmp((char *)a, (char *)b); }
+
+// compare the filename character
+int cmp(const void *a, const void *b) { 
+  const char *c_a=*(const char **)a;
+  const char *c_b=*(const char **)b;
+  return strcmp(c_a,c_b);   
+}
+
+// print out the files
 void printName(char *type, char *name) {
   printf("%s", type);
   for (int i = 0; i < level; i++)
@@ -28,10 +37,11 @@ void listDir(char *pathName) {
   struct dirent entry;
   struct dirent *result;
   int ret;
-  unsigned short type[1000];
-  int file_count = 0, dir_count = 0;
-  char file[1000][50], dir[1000][50];
+  unsigned short type[MAX_DIRSIZE];
+  int cntFile, cntDir;
+  char file[MAX_DIRSIZE][50], dir[MAX_DIRSIZE][50];
   ret = readdir_r(curDir, &entry, &result);
+  cntFile=0; cntDir=0;
   while (result != NULL) {
     // ignore . and ..
     if (strcmp(entry.d_name, ".") == 0 || strcmp(entry.d_name, "..") == 0) {
@@ -41,18 +51,18 @@ void listDir(char *pathName) {
     }
     assert(ret == 0);
     if (entry.d_type == DT_LNK) {
-      strcpy(file[file_count], entry.d_name);
-      type[file_count] = 1;
-      file_count++;
+      strcpy(file[cntFile], entry.d_name);
+      type[cntFile] = 1;
+      cntFile++;
     }
     if (entry.d_type == DT_REG) {
-      strcpy(file[file_count], entry.d_name);
-      type[file_count] = 2;
-      file_count++;
+      strcpy(file[cntFile], entry.d_name);
+      type[cntFile] = 2;
+      cntFile++;
     }
     if (entry.d_type == DT_DIR) {
-      strcpy(dir[dir_count], entry.d_name);
-      dir_count++;
+      strcpy(dir[cntDir], entry.d_name);
+      cntDir++;
       // printName("d", entry.d_name);
       // sprintf(newPathName, "%s/%s", pathName, entry.d_name);
       // printf("%s\n", newPathName);
@@ -61,9 +71,9 @@ void listDir(char *pathName) {
     ret = readdir_r(curDir, &entry, &result);
     assert(ret == 0);
   }
-  qsort(file, file_count, sizeof(file[0]), cmp);
-  qsort(dir, dir_count, sizeof(dir[0]), cmp);
-  for (int i = 0; i < file_count; i++) {
+  qsort(file, cntFile, sizeof(file[0]), cmp);
+  qsort(dir, cntDir, sizeof(dir[0]), cmp);
+  for (int i = 0; i < cntFile; i++) {
     if (type[i] == 1)
       printName("l", file[i]);
     else if (type[i] == 2)
@@ -71,7 +81,7 @@ void listDir(char *pathName) {
     else
       printf("error\n");
   }
-  for (int i = 0; i < dir_count; i++) {
+  for (int i = 0; i < cntDir; i++) {
     printName("d", dir[i]);
     sprintf(newPathName, "%s/%s", pathName, dir[i]);
     printf("%s\n", newPathName);
