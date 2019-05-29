@@ -1,12 +1,13 @@
-CC=gcc
-SOURCES=hw4_dir.c
-OBJECTS=hw4_dir.o
-TARGET=hw4_dir
+SHELL = /bin/bash
+CC = gcc
+CFLAGS = -g
+SRC = $(wildcard *.c)
+EXE = $(patsubst %.c, %, $(SRC))
 
-all: $(TARGET) clean
-$(TARGET):$(OBJECTS)
-	$(CC) -o $(TARGET) $(OBJECTS)
-$(OBJECTS):$(SOURCES)
-	$(CC) -c $(SOURCES)
+all: ${EXE}
+
+%:	%.c
+	${CC} ${CFLAGS} $@.c -o $@
+
 clean:
-	rm -rf $(OBJECTS)
+	rm ${EXE}

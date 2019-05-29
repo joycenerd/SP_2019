@@ -7,13 +7,14 @@
 #include <string.h>
 #include <sys/types.h>
 #define MAX_DIRSIZE 1010
+#define MAX_LEN 256
 
 int level = 0;
 
 // compare the filename character
 int cmp(const void *a, const void *b) { 
-  const char *c_a=*(const char **)a;
-  const char *c_b=*(const char **)b;
+  const char *c_a=(const char *)a;
+  const char *c_b=(const char *)b;
   return strcmp(c_a,c_b);   
 }
 
@@ -37,9 +38,9 @@ void listDir(char *pathName) {
   struct dirent entry;
   struct dirent *result;
   int ret;
-  unsigned short type[MAX_DIRSIZE];
+  int type[MAX_DIRSIZE];
   int cntFile, cntDir;
-  char file[MAX_DIRSIZE][50], dir[MAX_DIRSIZE][50];
+  char file[MAX_DIRSIZE][MAX_LEN], dir[MAX_DIRSIZE][MAX_LEN];
   ret = readdir_r(curDir, &entry, &result);
   cntFile=0; cntDir=0;
   while (result != NULL) {
@@ -50,29 +51,29 @@ void listDir(char *pathName) {
       continue;
     }
     assert(ret == 0);
+    // file type:link, equal to regular file
     if (entry.d_type == DT_LNK) {
       strcpy(file[cntFile], entry.d_name);
       type[cntFile] = 1;
       cntFile++;
     }
-    if (entry.d_type == DT_REG) {
+    // file type: regular file
+    else if (entry.d_type == DT_REG) {
       strcpy(file[cntFile], entry.d_name);
       type[cntFile] = 2;
       cntFile++;
     }
-    if (entry.d_type == DT_DIR) {
+    // file type: directory
+    else if (entry.d_type == DT_DIR) {
       strcpy(dir[cntDir], entry.d_name);
       cntDir++;
-      // printName("d", entry.d_name);
-      // sprintf(newPathName, "%s/%s", pathName, entry.d_name);
-      // printf("%s\n", newPathName);
-      // listDir(newPathName);
     }
     ret = readdir_r(curDir, &entry, &result);
     assert(ret == 0);
   }
   qsort(file, cntFile, sizeof(file[0]), cmp);
   qsort(dir, cntDir, sizeof(dir[0]), cmp);
+  // differentiate between link file and regular file
   for (int i = 0; i < cntFile; i++) {
     if (type[i] == 1)
       printName("l", file[i]);
@@ -91,4 +92,7 @@ void listDir(char *pathName) {
   level--;
 }
 
-int main(int argc, char **argv) { listDir(argv[1]); }
+int main(int argc, char *argv[]) { 
+    listDir(argv[1]);
+    return 0; 
+}
