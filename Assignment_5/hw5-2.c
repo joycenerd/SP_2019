@@ -42,6 +42,7 @@ parseString：將使用者傳進的命令轉換成字串陣列
 str：使用者傳進的命令
 cmd：回傳執行檔
 */
+// parse input command
 int parseString(char *str, char **cmd) {
   int idx = 0;
   char *retPtr;
@@ -98,8 +99,9 @@ int main(int argc, char **argv) {
       idx = parseString(cmdLine, &exeName);
     else
       continue;
-    if (strcmp(exeName, "exit") == 0)
+    if (strcmp(exeName, "exit") == 0) // exit the program
       break;
+    // change directory
     if (strcmp(exeName, "cd") == 0) {
       if (strcmp(argVect[1], "~") == 0)
         chdir(getenv("HOME"));
@@ -108,12 +110,14 @@ int main(int argc, char **argv) {
       continue;
     }
     pid = fork();
+    // environment argument
     char *env[] = {getenv("HOME"), "LOGNAME=home", (char *)0};
     if (pid == 0) {
       /*
       產生一個child執行使用者的指令
       */
       // if (execvp(exeName, argVect)==-1)
+      // ls
       if (strcmp(cmdLine, "ls") == 0) {
         if (idx == 1) {
           if (execle("/bin/ls", argVect[0], (char *)0, env) == -1) {
@@ -149,6 +153,7 @@ int main(int argc, char **argv) {
           }
         }
       }
+      // vim
       if (strcmp(cmdLine, "vim") == 0) {
         if (execle("/usr/bin/vim", argVect[0], argVect[1], (char *)0, env) ==
             -1) {
@@ -156,12 +161,14 @@ int main(int argc, char **argv) {
           exit(errno * -1);
         }
       }
+      // more
       if (strcmp(cmdLine, "more") == 0) {
         if (execle("/bin/more", argVect[0], argVect[1], (char *)0, env) == -1) {
           perror("myShell");
           exit(errno * -1);
         }
       }
+      // less
       if (strcmp(cmdLine, "less") == 0) {
         if (execle("/usr/bin/less", argVect[0], argVect[1], (char *)0, env) ==
             -1) {
@@ -169,6 +176,7 @@ int main(int argc, char **argv) {
           exit(errno * -1);
         }
       }
+      // time
       if (strcmp(cmdLine, "time") == 0) {
         if (execle("/usr/bin/time", argVect[0], argVect[1], (char *)0, env) ==
             -1) {
@@ -176,8 +184,9 @@ int main(int argc, char **argv) {
           exit(errno * -1);
         }
       }
+      // other executable file
       if (idx == 1) {
-        if (execle(argVect[0], argVect[0], argVect[1], (char *)0, env) == -1) {
+        if (execle(argVect[0], argVect[0], (char *)0, env) == -1) {
           perror("myShell");
           exit(errno * -1);
         }
