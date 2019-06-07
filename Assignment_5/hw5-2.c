@@ -112,84 +112,42 @@ int main(int argc, char **argv) {
     pid = fork();
     // environment argument
     char *env[] = {getenv("HOME"), "LOGNAME=home", (char *)0};
+    char *path[]={"/home/user/bin","/home/user/.local/bin","/usr/local/sbin","/usr/local/bin",
+      "/usr/sbin","/usr/bin","/sbin","/bin","/usr/games","/usr/local/games"};
+      int i,ret;
+      char wholePath[256];
     if (pid == 0) {
       /*
       產生一個child執行使用者的指令
       */
       // if (execvp(exeName, argVect)==-1)
-      // ls
-      if (strcmp(cmdLine, "ls") == 0) {
-        if (idx == 1) {
-          if (execle("/bin/ls", argVect[0], (char *)0, env) == -1) {
-            perror("myShell");
-            exit(errno * -1);
-          }
+      for(i=0;i<10;i++){
+       // construct the whole path
+        strcpy(wholePath,path[i]);
+        strncat(wholePath,"/",1);
+        strcat(wholePath,argVect[0]);
+        // specify different numbers of arguments
+        if(idx==1){
+          if((ret=execle(wholePath,argVect[0],NULL,env))==-1)
+            continue;
         }
-        if (idx == 2) {
-          if (execle("/bin/ls", argVect[0], argVect[1], (char *)0, env) == -1) {
-            perror("myShell");
-            exit(errno * -1);
-          }
+        else if(idx==2){
+          if((ret=execle(wholePath,argVect[0],argVect[1],NULL,env))==-1)
+            continue;
         }
-        if (idx == 2) {
-          if (execle("/bin/ls", argVect[0], argVect[1], argVect[2], (char *)0,
-                     env) == -1) {
-            perror("myShell");
-            exit(errno * -1);
-          }
+        else if(idx==3){
+          if((ret=execle(wholePath,argVect[0],argVect[1],argVect[2],NULL,env))==-1)
+            continue;
         }
-        if (idx == 3) {
-          if (execle("/bin/ls", argVect[0], argVect[1], argVect[2], argVect[3],
-                     (char *)0, env) == -1) {
-            perror("myShell");
-            exit(errno * -1);
-          }
+        else if(idx==4){
+          if((ret=execle(wholePath,argVect[0],argVect[1],argVect[2],argVect[3],NULL,env))==-1)
+            continue;
         }
-        if (idx == 4) {
-          if (execle("/bin/ls", argVect[0], argVect[1], argVect[2], argVect[3],
-                     argVect[4], (char *)0, env) == -1) {
-            perror("myShell");
-            exit(errno * -1);
-          }
-        }
+        memset(wholePath,0,sizeof(wholePath));
       }
-      // vim
-      if (strcmp(cmdLine, "vim") == 0) {
-        if (execle("/usr/bin/vim", argVect[0], argVect[1], (char *)0, env) ==
-            -1) {
-          perror("myShell");
-          exit(errno * -1);
-        }
-      }
-      // more
-      if (strcmp(cmdLine, "more") == 0) {
-        if (execle("/bin/more", argVect[0], argVect[1], (char *)0, env) == -1) {
-          perror("myShell");
-          exit(errno * -1);
-        }
-      }
-      // less
-      if (strcmp(cmdLine, "less") == 0) {
-        if (execle("/usr/bin/less", argVect[0], argVect[1], (char *)0, env) ==
-            -1) {
-          perror("myShell");
-          exit(errno * -1);
-        }
-      }
-      // time
-      if (strcmp(cmdLine, "time") == 0) {
-        if (execle("/usr/bin/time", argVect[0], argVect[1], (char *)0, env) ==
-            -1) {
-          perror("myShell");
-          exit(errno * -1);
-        }
-      }
-      // other executable file
-      if (idx == 1) {
-        if (execle(argVect[0], argVect[0], (char *)0, env) == -1) {
-          perror("myShell");
-          exit(errno * -1);
-        }
+      // for executable files
+      if(ret==-1){
+        execle(argVect[0],argVect[0],NULL,env);
       }
     }
 
